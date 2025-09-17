@@ -1,0 +1,22 @@
+.cart-container {
+  padding: 20px;
+  max-width: 600px;
+  margin: 0 auto;
+}
+.cart-items {
+  margin: 10px 0;
+}
+.cart-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px;
+  border-bottom: 1px solid #ccc;
+}
+.cart-total {
+  margin-top: 20px;
+  text-align: right;
+}
+button {
+  padding: 5px 10px;
+  cursor: pointer;
+}
