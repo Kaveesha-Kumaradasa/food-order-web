@@ -1,0 +1,57 @@
+<div class="homepage-container">
+  <!-- Shop Name Header -->
+  <header class="shop-header">
+    <h1 class="shop-name">Delicious Bites Restaurant</h1>
+    <p class="shop-description">Your favorite food delivery spot</p>
+  </header>
+
+  <!-- Horizontal Scrollable Menu Categories -->
+  <section class="menu-categories">
+    <h2 class="section-title">Menu Categories</h2>
+    <div class="categories-scroll">
+      <div class="categories-list" #categoriesList>
+        <button 
+          *ngFor="let category of menuCategories" 
+          class="category-btn" 
+          [class.active]="selectedCategory === category"
+          (click)="selectCategory(category)">
+          {{ category.name }}
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Menu Items -->
+  <section class="menu-items" *ngIf="selectedCategory">
+    <h2 class="section-title">{{ selectedCategory.name }} Menu</h2>
+    <div class="items-grid">
+      <div 
+        *ngFor="let item of filteredMenuItems" 
+        class="menu-item-card" 
+        (click)="openMenuModal(item)">
+        <img [src]="item.image" [alt]="item.name" class="item-image">
+        <div class="item-details">
+          <h3 class="item-name">{{ item.name }}</h3>
+          <p class="item-price">${{ item.price }}</p>
+          <p class="item-desc">{{ item.description }}</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Modal for Menu Details -->
+  <div class="modal-overlay" *ngIf="showModal" (click)="closeMenuModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <button class="close-btn" (click)="closeMenuModal()">&times;</button>
+      <div *ngIf="selectedMenuItem">
+        <img [src]="selectedMenuItem.image" [alt]="selectedMenuItem.name" class="modal-image">
+        <h2 class="modal-title">{{ selectedMenuItem.name }}</h2>
+        <p class="modal-price">${{ selectedMenuItem.price }}</p>
+        <p class="modal-desc">{{ selectedMenuItem.description }}</p>
+        <div class="modal-actions">
+          <button class="add-to-cart-btn" (click)="addToCart(selectedMenuItem)">Add to Cart</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
