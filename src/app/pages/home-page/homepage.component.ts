@@ -1,18 +1,17 @@
-import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Subscription, of } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
+import { PosService } from '../../services/pos.service';
 
-interface MenuCategory {
-  name: string;
-  id: string;
-}
-
-interface MenuItem {
-  id: string;
+type MenuCategory = { id: string | number; name: string };
+type MenuItem = {
+  id: string | number;
   name: string;
   description: string;
   price: number;
-  image: string;
-  categoryId: string;
-}
+  image?: string;
+  categoryId?: string | number | null;
+};
 
 @Component({
   selector: 'app-homepage',
@@ -20,89 +19,130 @@ interface MenuItem {
   styleUrls: ['./homepage.component.scss'],
   standalone: false,
 })
-export class HomepageComponent implements OnInit {
-  menuCategories: MenuCategory[] = [
-    { name: 'Appetizers', id: 'appetizers' },
-    { name: 'Main Course', id: 'main' },
-    { name: 'Desserts', id: 'desserts' },
-    { name: 'Beverages', id: 'drinks' },
-    { name: 'Salads', id: 'salads' },
-    { name: 'Soups', id: 'soups' }
-  ];
+export class HomepageComponent implements OnInit, OnDestroy {
+  // UI state
+  loadingCategories = false;
+  loadingItems = false;
+  error = '';
 
-  menuItems: MenuItem[] = [
-    {
-      id: '1',
-      name: 'Garlic Bread',
-      description: 'Crispy garlic bread with herbs',
-      price: 5.99,
-      image: 'https://via.placeholder.com/250x200?text=Garlic+Bread',
-      categoryId: 'appetizers'
-    },
-    {
-      id: '2',
-      name: 'Margherita Pizza',
-      description: 'Classic pizza with fresh tomatoes and basil',
-      price: 12.99,
-      image: 'https://via.placeholder.com/250x200?text=Margherita+Pizza',
-      categoryId: 'main'
-    },
-    {
-      id: '3',
-      name: 'Chocolate Cake',
-      description: 'Rich chocolate cake with frosting',
-      price: 6.99,
-      image: 'https://via.placeholder.com/250x200?text=Chocolate+Cake',
-      categoryId: 'desserts'
-    },
-    {
-      id: '4',
-      name: 'Coca Cola',
-      description: 'Refreshing cola drink',
-      price: 2.49,
-      image: 'https://via.placeholder.com/250x200?text=Coca+Cola',
-      categoryId: 'drinks'
-    },
-    {
-      id: '5',
-      name: 'Caesar Salad',
-      description: 'Fresh salad with Caesar dressing',
-      price: 8.99,
-      image: 'https://via.placeholder.com/250x200?text=Caesar+Salad',
-      categoryId: 'salads'
-    },
-    {
-      id: '6',
-      name: 'Tomato Soup',
-      description: 'Warm tomato soup',
-      price: 4.99,
-      image: 'https://via.placeholder.com/250x200?text=Tomato+Soup',
-      categoryId: 'soups'
-    }
-  ];
-
+  // Data for template
+  menuCategories: MenuCategory[] = [];
   selectedCategory: MenuCategory | null = null;
   filteredMenuItems: MenuItem[] = [];
+
+  // Modal
   showModal = false;
   selectedMenuItem: MenuItem | null = null;
-  cart: MenuItem[] = [];
 
-  @ViewChild('categoriesList') categoriesList!: ElementRef;
+  // Internal
+  private subs = new Subscription();
+  private itemsByCategory = new Map<string | number, MenuItem[]>();
+
+  // TrackBy
+  trackByCategory = (_: number, c: { id: string | number }) => c?.id;
+  trackByItem = (_: number, it: { id: string | number }) => it?.id;
+
+  constructor(private pos: PosService) {}
 
   ngOnInit(): void {
-    this.selectedCategory = this.menuCategories[0];
-    this.filterItems();
+    this.fetchMenu();
   }
 
-  selectCategory(category: MenuCategory): void {
-    this.selectedCategory = category;
-    this.filterItems();
+  ngOnDestroy(): void {
+    this.subs.unsubscribe();
   }
 
-  filterItems(): void {
-    if (this.selectedCategory) {
-      this.filteredMenuItems = this.menuItems.filter(item => item.categoryId === this.selectedCategory!.id);
+  // ---------------------------
+  // Fetch
+  // ---------------------------
+  fetchMenu(): void {
+    this.loadingCategories = true;
+    this.loadingItems = true;
+    this.error = '';
+
+    this.subs.add(
+      this.pos.getMainMenuCategories().pipe(
+        map((res) => {
+          console.log('[API]', res);
+          return this.buildMenuView(res);
+        }),
+        catchError((err) => {
+          console.error('[API error]', err);
+          this.error = 'Failed to load menu.';
+          return of({ categories: [], itemsByCategory: new Map<string | number, MenuItem[]>() });
+        })
+      ).subscribe(({ categories, itemsByCategory }) => {
+        this.menuCategories = categories;
+        this.itemsByCategory = itemsByCategory;
+
+        const firstWithItems = this.menuCategories.find(c => (this.itemsByCategory.get(c.id)?.length ?? 0) > 0);
+        this.selectedCategory = firstWithItems ?? this.menuCategories[0] ?? null;
+        this.applyFilter();
+
+        this.loadingCategories = false;
+        this.loadingItems = false;
+
+        if (!this.menuCategories.length) {
+          this.error = 'No categories/items returned by the endpoint.';
+        }
+      })
+    );
+  }
+
+  // ---------------------------
+  // Helpers (renamed)
+  // ---------------------------
+
+  /** Previously: normalizeMainMenuPayload */
+  private buildMenuView(res: any): {
+    categories: MenuCategory[],
+    itemsByCategory: Map<string | number, MenuItem[]>
+  } {
+    const categories: MenuCategory[] = [];
+    const itemsByCategory = new Map<string | number, MenuItem[]>();
+
+    const data = res?.data ?? {};
+    if (data && typeof data === 'object' && !Array.isArray(data)) {
+      for (const [categoryName, arr] of Object.entries<any[]>(data)) {
+        const catId = this.slug(categoryName);
+        const items = Array.isArray(arr) ? arr.map(it => this.toMenuItem(it, catId)) : [];
+        categories.push({ id: catId, name: categoryName });
+        itemsByCategory.set(catId, items);
+      }
     }
+
+    return { categories, itemsByCategory };
+  }
+
+  /** Previously: normalizeItem */
+  private toMenuItem(raw: any, categoryId?: string | number | null): MenuItem {
+    const priceRaw = raw?.price ?? raw?.cost ?? 0;
+    const price = typeof priceRaw === 'string' ? parseFloat(priceRaw) : Number(priceRaw);
+
+    return {
+      id: String(raw?.id ?? raw?.itemId ?? raw?._id ?? randomId()),
+      name: String(raw?.name ?? raw?.title ?? 'Item'),
+      description: String(raw?.description ?? raw?.desc ?? ''),
+      price: Number.isFinite(price) ? price : 0,
+      image: raw?.image ?? raw?.image_url ?? raw?.photo ?? '',
+      categoryId: categoryId ?? null,
+    };
+  }
+
+  // ---------------------------
+  // UI actions
+  // ---------------------------
+  selectCategory(cat: MenuCategory): void {
+    this.selectedCategory = cat;
+    this.applyFilter();
+  }
+
+  private applyFilter(): void {
+    if (!this.selectedCategory) {
+      this.filteredMenuItems = [];
+      return;
+    }
+    this.filteredMenuItems = [...(this.itemsByCategory.get(this.selectedCategory.id) ?? [])];
   }
 
   openMenuModal(item: MenuItem): void {
@@ -116,9 +156,30 @@ export class HomepageComponent implements OnInit {
   }
 
   addToCart(item: MenuItem): void {
-    this.cart.push({ ...item });
-    console.log('Added to cart:', item);
-    alert(`${item.name} added to cart!`);
+    console.log('[cart] add', item);
     this.closeMenuModal();
   }
+
+  getDefaultImage(): string {
+    return 'https://www.precisionorthomd.com/wp-content/uploads/2023/10/percision-blog-header-junk-food-102323.jpg';
+  }
+
+  onImageError(ev: Event, _item: MenuItem): void {
+    const el = ev.target as HTMLImageElement;
+    if (!el.src.includes('placeholder.com')) {
+      el.onerror = null; // prevent loops
+      el.src = this.getDefaultImage();
+    }
+  }
+
+  // ---------------------------
+  // Utils
+  // ---------------------------
+  private slug(v: any): string {
+    return String(v ?? '').trim().toLowerCase().replace(/\s+/g, '-');
+  }
+}
+
+function randomId(): string {
+  return 'id_' + Math.random().toString(36).slice(2);
 }

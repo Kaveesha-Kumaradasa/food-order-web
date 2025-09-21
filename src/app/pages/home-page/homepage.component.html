@@ -1,53 +1,72 @@
 <div class="homepage-container">
-  <!-- Shop Name Header -->
+  <!-- Shop Header -->
   <header class="shop-header">
     <h1 class="shop-name">Delicious Bites Restaurant</h1>
     <p class="shop-description">Your favorite food delivery spot</p>
   </header>
 
-  <!-- Horizontal Scrollable Menu Categories -->
-  <section class="menu-categories">
+  <!-- Loading -->
+  <div *ngIf="loadingCategories || loadingItems" class="loading-container">
+    <p>Loading delicious menu items...</p>
+  </div>
+
+  <!-- Categories -->
+  <section class="menu-categories" *ngIf="!loadingCategories">
     <h2 class="section-title">Menu Categories</h2>
     <div class="categories-scroll">
-      <div class="categories-list" #categoriesList>
-        <button 
-          *ngFor="let category of menuCategories" 
-          class="category-btn" 
-          [class.active]="selectedCategory === category"
-          (click)="selectCategory(category)">
-          {{ category.name }}
-        </button>
-      </div>
+      <button
+        *ngFor="let category of menuCategories; trackBy: trackByCategory"
+        (click)="selectCategory(category)"
+        class="category-btn"
+        [class.active]="selectedCategory?.id === category.id">
+        {{ category.name || 'Unknown Category' }}
+      </button>
     </div>
   </section>
 
-  <!-- Menu Items -->
-  <section class="menu-items" *ngIf="selectedCategory">
-    <h2 class="section-title">{{ selectedCategory.name }} Menu</h2>
-    <div class="items-grid">
-      <div 
-        *ngFor="let item of filteredMenuItems" 
-        class="menu-item-card" 
-        (click)="openMenuModal(item)">
-        <img [src]="item.image" [alt]="item.name" class="item-image">
+  <!-- Items -->
+  <section class="menu-items" *ngIf="selectedCategory && !loadingItems">
+    <h2 class="section-title">{{ selectedCategory.name || 'Menu' }} Menu</h2>
+
+    <div *ngIf="filteredMenuItems.length > 0; else noItems" class="items-grid">
+      <div
+        *ngFor="let item of filteredMenuItems; trackBy: trackByItem"
+        (click)="openMenuModal(item)"
+        class="menu-item-card">
+        <img
+          [src]="item.image || getDefaultImage()"
+          (error)="onImageError($event, item)"
+          [alt]="item.name || 'Food item'"
+          class="item-image">
         <div class="item-details">
-          <h3 class="item-name">{{ item.name }}</h3>
-          <p class="item-price">${{ item.price }}</p>
-          <p class="item-desc">{{ item.description }}</p>
+          <h3 class="item-name">{{ item.name || 'Unknown Item' }}</h3>
+          <p class="item-price">${{ (item.price || 0) | number:'1.2-2' }}</p>
+          <p class="item-desc">{{ item.description || 'Delicious food item' }}</p>
         </div>
       </div>
     </div>
+
+    <ng-template #noItems>
+      <div class="no-items-message">
+        <p>No items available for this category</p>
+        <button class="retry-btn" (click)="fetchMenu()">Refresh Menu</button>
+      </div>
+    </ng-template>
   </section>
 
-  <!-- Modal for Menu Details -->
+  <!-- Modal -->
   <div class="modal-overlay" *ngIf="showModal" (click)="closeMenuModal()">
     <div class="modal-content" (click)="$event.stopPropagation()">
       <button class="close-btn" (click)="closeMenuModal()">&times;</button>
       <div *ngIf="selectedMenuItem">
-        <img [src]="selectedMenuItem.image" [alt]="selectedMenuItem.name" class="modal-image">
-        <h2 class="modal-title">{{ selectedMenuItem.name }}</h2>
-        <p class="modal-price">${{ selectedMenuItem.price }}</p>
-        <p class="modal-desc">{{ selectedMenuItem.description }}</p>
+        <img
+          [src]="selectedMenuItem.image || getDefaultImage()"
+          (error)="onImageError($event, selectedMenuItem)"
+          [alt]="selectedMenuItem.name || 'Food item'"
+          class="modal-image">
+        <h2 class="modal-title">{{ selectedMenuItem.name || 'Unknown Item' }}</h2>
+        <p class="modal-price">${{ (selectedMenuItem.price || 0) | number:'1.2-2' }}</p>
+        <p class="modal-desc">{{ selectedMenuItem.description || 'Delicious food item' }}</p>
         <div class="modal-actions">
           <button class="add-to-cart-btn" (click)="addToCart(selectedMenuItem)">Add to Cart</button>
         </div>

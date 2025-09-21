@@ -1,0 +1,46 @@
+.top-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 20px;
+  background-color: #333;
+  color: white;
+}
+
+.logo h1 {
+  margin: 0;
+  font-size: 24px;
+}
+
+.nav-links {
+  list-style: none;
+  display: flex;
+  margin: 0;
+  padding: 0;
+}
+
+.nav-links li {
+  margin-left: 20px;
+}
+
+.nav-links a {
+  color: white;
+  text-decoration: none;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  cursor: pointer; /* Ensure clickable appearance */
+}
+
+.nav-links a:hover {
+  color: #ffd700; /* Highlight on hover */
+}
+
+.cart-icon {
+  margin-right: 5px;
+}
+
+.active {
+  color: #ffd700; /* Highlight active link */
+  font-weight: bold;
+}
