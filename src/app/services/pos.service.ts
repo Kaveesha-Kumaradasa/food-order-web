@@ -8,13 +8,13 @@ export class PosService {
 
   public getCategories(): Observable<any> {
     const path = `/api/v1/webshop/categories/webshop-brand/1/shop/2`;
-    console.log('[PosService] GET (hard-coded)', path);
+    console.log('[PosService] GET ', path);
     return this.api.get(path, 'pos');
   }
 
   public getMainMenuCategories(): Observable<any> {
     const path = `/api/v1/webshop/main-menu/65/categories/webshop-brand/1/shop/2`;
-    console.log('[PosService] GET (hard-coded)', path);
+    console.log('[PosService] GET ', path);
     return this.api.get(path, 'pos');
   }
 }

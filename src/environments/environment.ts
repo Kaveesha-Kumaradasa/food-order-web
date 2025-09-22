@@ -11,4 +11,8 @@ export const environment = {
   CLIENT_ID: 4,  
   CLIENT_SECRET: 'wi1ciuewRqbiHgoEQMizPUyx0fYnBkNdnoljWXGa',
   GRANT_TYPE: 'password',
+
+ // Used by registration
+  webshop_brand_id: 1,   
+  default_country_code: '+94'
 };

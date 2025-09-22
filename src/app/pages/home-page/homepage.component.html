@@ -58,17 +58,29 @@
   <div class="modal-overlay" *ngIf="showModal" (click)="closeMenuModal()">
     <div class="modal-content" (click)="$event.stopPropagation()">
       <button class="close-btn" (click)="closeMenuModal()">&times;</button>
-      <div *ngIf="selectedMenuItem">
+
+      <div *ngIf="selectedMenuItem as smi">
         <img
-          [src]="selectedMenuItem.image || getDefaultImage()"
-          (error)="onImageError($event, selectedMenuItem)"
-          [alt]="selectedMenuItem.name || 'Food item'"
+          [src]="smi.image || getDefaultImage()"
+          (error)="onImageError($event, smi)"
+          [alt]="smi.name || 'Food item'"
           class="modal-image">
-        <h2 class="modal-title">{{ selectedMenuItem.name || 'Unknown Item' }}</h2>
-        <p class="modal-price">${{ (selectedMenuItem.price || 0) | number:'1.2-2' }}</p>
-        <p class="modal-desc">{{ selectedMenuItem.description || 'Delicious food item' }}</p>
+
+        <h2 class="modal-title">{{ smi.name || 'Unknown Item' }}</h2>
+        <p class="modal-price">${{ (smi.price || 0) | number:'1.2-2' }}</p>
+        <p class="modal-desc">{{ smi.description || 'Delicious food item' }}</p>
+
         <div class="modal-actions">
-          <button class="add-to-cart-btn" (click)="addToCart(selectedMenuItem)">Add to Cart</button>
+          <!-- quantity control -->
+          <label class="qty-label">
+            Qty:
+            <input type="number" min="1" [(ngModel)]="selectedQty" />
+          </label>
+
+          <!-- use selectedMenuItem (smi) in scope -->
+          <button (click)="addToCart(smi, selectedQty)">
+            Add {{ selectedQty || 1 }} to Cart
+          </button>
         </div>
       </div>
     </div>

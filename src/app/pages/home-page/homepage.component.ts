@@ -2,6 +2,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Subscription, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { PosService } from '../../services/pos.service';
+import { CartService } from '../../services/cart.service';
 
 type MenuCategory = { id: string | number; name: string };
 type MenuItem = {
@@ -20,6 +21,9 @@ type MenuItem = {
   standalone: false,
 })
 export class HomepageComponent implements OnInit, OnDestroy {
+
+  selectedQty = 1;
+
   // UI state
   loadingCategories = false;
   loadingItems = false;
@@ -42,7 +46,10 @@ export class HomepageComponent implements OnInit, OnDestroy {
   trackByCategory = (_: number, c: { id: string | number }) => c?.id;
   trackByItem = (_: number, it: { id: string | number }) => it?.id;
 
-  constructor(private pos: PosService) {}
+  constructor(
+    private pos: PosService,
+    private cart: CartService     // ← inject CartService here, in the same constructor
+  ) {}
 
   ngOnInit(): void {
     this.fetchMenu();
@@ -52,9 +59,7 @@ export class HomepageComponent implements OnInit, OnDestroy {
     this.subs.unsubscribe();
   }
 
-  // ---------------------------
-  // Fetch
-  // ---------------------------
+
   fetchMenu(): void {
     this.loadingCategories = true;
     this.loadingItems = true;
@@ -89,11 +94,7 @@ export class HomepageComponent implements OnInit, OnDestroy {
     );
   }
 
-  // ---------------------------
-  // Helpers (renamed)
-  // ---------------------------
 
-  /** Previously: normalizeMainMenuPayload */
   private buildMenuView(res: any): {
     categories: MenuCategory[],
     itemsByCategory: Map<string | number, MenuItem[]>
@@ -129,9 +130,7 @@ export class HomepageComponent implements OnInit, OnDestroy {
     };
   }
 
-  // ---------------------------
-  // UI actions
-  // ---------------------------
+
   selectCategory(cat: MenuCategory): void {
     this.selectedCategory = cat;
     this.applyFilter();
@@ -155,8 +154,18 @@ export class HomepageComponent implements OnInit, OnDestroy {
     this.selectedMenuItem = null;
   }
 
-  addToCart(item: MenuItem): void {
-    console.log('[cart] add', item);
+addToCart(item: MenuItem, qty: number = 1): void {
+    this.cart.add(
+      {
+        id: item.id,
+        name: item.name,
+        price: item.price,
+        image: item.image,
+        description: item.description,
+        categoryId: item.categoryId,
+      },
+      qty
+    );
     this.closeMenuModal();
   }
 
@@ -172,9 +181,7 @@ export class HomepageComponent implements OnInit, OnDestroy {
     }
   }
 
-  // ---------------------------
-  // Utils
-  // ---------------------------
+
   private slug(v: any): string {
     return String(v ?? '').trim().toLowerCase().replace(/\s+/g, '-');
   }

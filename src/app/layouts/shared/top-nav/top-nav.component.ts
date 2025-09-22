@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
+import { AuthenticationService } from '../../../services/user.service'; 
 
 @Component({
   selector: 'app-top-nav',
@@ -8,10 +9,15 @@ import { Router } from '@angular/router';
   standalone: false
 })
 export class TopNavComponent {
-  constructor(private router: Router) {}
 
+  constructor(public auth: AuthenticationService, private router: Router) {}
 
   navigateTo(path: string) {
     this.router.navigate([path]);
+  }
+
+  onLogout() {
+    this.auth.logout();
+    this.router.navigate(['/home']); 
   }
 }

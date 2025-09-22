@@ -4,7 +4,7 @@ import { PagesRoutingModule } from './pages-routing.module';
 import { SharedModule } from '../layouts/shared/shared.module';
 import { HomepageComponent } from './home-page/homepage.component';
 import { CartComponent } from './cart/cart.component';
-
+import { FormsModule } from '@angular/forms';  
 
 @NgModule({
   declarations: [
@@ -15,6 +15,7 @@ import { CartComponent } from './cart/cart.component';
     CommonModule,
     PagesRoutingModule,
     SharedModule,
+    FormsModule,          
   ],
 })
 export class PagesModule {}

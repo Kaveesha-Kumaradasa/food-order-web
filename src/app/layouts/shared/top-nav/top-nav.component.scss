@@ -1,46 +1,62 @@
+/* Force nav to top-most layer so nothing can cover it */
 .top-nav {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px 20px;
-  background-color: #333;
-  color: white;
-}
-
-.logo h1 {
-  margin: 0;
-  font-size: 24px;
-}
-
-.nav-links {
-  list-style: none;
-  display: flex;
-  margin: 0;
-  padding: 0;
-}
-
-.nav-links li {
-  margin-left: 20px;
-}
-
-.nav-links a {
-  color: white;
-  text-decoration: none;
-  font-size: 16px;
+  position: fixed;           /* fixed at the top */
+  top: 0; left: 0; right: 0;
+  z-index: 2147483647;       /* max-ish */
   display: flex;
   align-items: center;
-  cursor: pointer; /* Ensure clickable appearance */
+  gap: 12px;
+  padding: 10px 16px;
+  background: #fff;
+  border-bottom: 1px solid #eee;
+
+  /* Allow clicks no matter what parent styles do */
+  &, * {
+    pointer-events: auto !important;
+  }
+
+  .brand { font-weight: 700; text-decoration: none; color: #333; }
+
+  .spacer { flex: 1 1 auto; min-width: 8px; }
+
+  a, .linklike {
+    text-decoration: none;
+    color: #2196F3;
+    background: none;
+    border: none;
+    padding: 0;
+    font: inherit;
+    cursor: pointer;
+
+    &:hover { color: #1976D2; }
+    &:focus-visible { outline: 2px solid #1976D2; outline-offset: 2px; border-radius: 4px; }
+  }
+
+  .user-pill {
+    padding: 6px 10px;
+    background: #f4f6f8;
+    border-radius: 999px;
+    font-size: 0.9rem;
+    color: #333;
+    white-space: nowrap;
+    line-height: 1;
+  }
+
+  .logout-btn {
+    border: none;
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    background: #ef5350;
+    color: #fff;
+    line-height: 1;
+
+    &:hover { background: #e53935; }
+    &:focus-visible { outline: 2px solid #c62828; outline-offset: 2px; }
+  }
 }
 
-.nav-links a:hover {
-  color: #ffd700; /* Highlight on hover */
-}
-
-.cart-icon {
-  margin-right: 5px;
-}
-
-.active {
-  color: #ffd700; /* Highlight active link */
-  font-weight: bold;
+/* Push page content down so it isn't under the fixed nav */
+.app-content, main, .page, .wrapper {
+  padding-top: 56px; /* adjust if your nav height changes */
 }

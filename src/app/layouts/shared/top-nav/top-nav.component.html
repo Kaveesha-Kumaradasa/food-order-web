@@ -1,11 +1,22 @@
 <nav class="top-nav">
-  <div class="logo">
-    <h1>Delicious Bites</h1>
-  </div>
-  <ul class="nav-links">
-    <li><a (click)="navigateTo('/home')">Home</a></li>
-    <li><a (click)="navigateTo('/cart')">Cart</a></li>
-    <li><a (click)="navigateTo('/auth/login')">Login</a></li>
-    <li><a (click)="navigateTo('/auth/register')">Register</a></li>
-  </ul>
+  <a class="brand" routerLink="/home" (click)="navigateTo('/home')">Delicious Bites</a>
+
+  <span class="spacer"></span>
+
+  <!-- Logged-in view -->
+  <ng-container *ngIf="(auth.currentUser | async) as user; else guest">
+    <a routerLink="/home" (click)="navigateTo('/home')">Home</a>
+    <a routerLink="/cart" (click)="navigateTo('/cart')">Cart</a>
+    <span class="user-pill">{{ user.name || user.email }}</span>
+    <button type="button" class="logout-btn" (click)="onLogout()">Logout</button>
+  </ng-container>
+
+  <!-- Logged-out view -->
+  <ng-template #guest>
+    <!-- use button.linklike as a fallback that looks like a link -->
+    <a routerLink="/home" (click)="navigateTo('/home')">Home</a>
+    <a routerLink="/auth/login" (click)="navigateTo('/auth/login')">Login</a>
+    <a routerLink="/auth/register" (click)="navigateTo('/auth/register')">Register</a>
+    <a routerLink="/cart" (click)="navigateTo('/cart')">Cart</a>
+  </ng-template>
 </nav>
