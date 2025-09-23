@@ -54,35 +54,11 @@
     </ng-template>
   </section>
 
-  <!-- Modal -->
-  <div class="modal-overlay" *ngIf="showModal" (click)="closeMenuModal()">
-    <div class="modal-content" (click)="$event.stopPropagation()">
-      <button class="close-btn" (click)="closeMenuModal()">&times;</button>
+<app-menu-item
+  [item]="selectedMenuItem"
+  [visible]="showModal"
+  (close)="closeMenuModal()"
+  (add)="addToCart($event)">
+</app-menu-item>
 
-      <div *ngIf="selectedMenuItem as smi">
-        <img
-          [src]="smi.image || getDefaultImage()"
-          (error)="onImageError($event, smi)"
-          [alt]="smi.name || 'Food item'"
-          class="modal-image">
-
-        <h2 class="modal-title">{{ smi.name || 'Unknown Item' }}</h2>
-        <p class="modal-price">${{ (smi.price || 0) | number:'1.2-2' }}</p>
-        <p class="modal-desc">{{ smi.description || 'Delicious food item' }}</p>
-
-        <div class="modal-actions">
-          <!-- quantity control -->
-          <label class="qty-label">
-            Qty:
-            <input type="number" min="1" [(ngModel)]="selectedQty" />
-          </label>
-
-          <!-- use selectedMenuItem (smi) in scope -->
-          <button (click)="addToCart(smi, selectedQty)">
-            Add {{ selectedQty || 1 }} to Cart
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
 </div>

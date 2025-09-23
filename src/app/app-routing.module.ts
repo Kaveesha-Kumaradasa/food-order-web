@@ -19,11 +19,11 @@ const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'home' },
 
   // protected module(s)
-  /*{
+  {
     path: 'cart',
     loadChildren: () => import('./pages/pages.module').then(m => m.PagesModule),
     canActivate: [AuthGuard],                 
-  },*/
+  },
 
   // catch-all
   { path: '**', redirectTo: 'home' },

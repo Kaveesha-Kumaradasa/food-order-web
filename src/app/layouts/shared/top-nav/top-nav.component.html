@@ -7,7 +7,6 @@
   <ng-container *ngIf="(auth.currentUser | async) as user; else guest">
     <a routerLink="/home" (click)="navigateTo('/home')">Home</a>
     <a routerLink="/cart" (click)="navigateTo('/cart')">Cart</a>
-    <span class="user-pill">{{ user.name || user.email }}</span>
     <button type="button" class="logout-btn" (click)="onLogout()">Logout</button>
   </ng-container>
 
@@ -17,6 +16,5 @@
     <a routerLink="/home" (click)="navigateTo('/home')">Home</a>
     <a routerLink="/auth/login" (click)="navigateTo('/auth/login')">Login</a>
     <a routerLink="/auth/register" (click)="navigateTo('/auth/register')">Register</a>
-    <a routerLink="/cart" (click)="navigateTo('/cart')">Cart</a>
   </ng-template>
 </nav>

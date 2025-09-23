@@ -1,54 +1,50 @@
-/* Container */
 .homepage-container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 1.5rem;
+  padding: 60px;
 }
 
-/* Header */
+
 .shop-header {
   text-align: center;
-  margin-bottom: 2rem;
-  padding: 1.5rem;
+  margin-bottom: 32px;
+  padding: 24px;
   background: linear-gradient(to right, #facc15, #4ade80);
   color: white;
-  border-radius: 0.5rem;
+  border-radius: 8px;
   box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 
   .shop-name {
-    font-size: 2rem;
+    font-size: 32px;
     font-weight: bold;
-    margin-bottom: 0.25rem;
+    margin-bottom: 4px;
   }
 
   .shop-description {
-    font-size: 1rem;
+    font-size: 16px;
     opacity: 0.9;
   }
 }
 
-/* ==========================
-   Categories (Horizontal bar)
-   ========================== */
 .menu-categories {
-  margin-bottom: 1.25rem;
+  margin-bottom: 20px;
 
   .section-title {
-    font-size: 1.1rem;
+    font-size: 18px;
     font-weight: 700;
-    margin-bottom: 0.75rem;
+    margin-bottom: 12px;
     color: #111827;
   }
 
   .categories-scroll {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 8px;
 
     background: #fff;
     border: 1px solid #e5e7eb;
-    border-radius: 0.5rem;
-    padding: 0.4rem;
+    border-radius: 8px;
+    padding: 6px;
 
     overflow-x: auto;
     overflow-y: hidden;
@@ -61,13 +57,13 @@
   }
 
   .category-btn {
-    padding: 0.45rem 0.9rem;
+    padding: 7px 14px;
     border: 1px solid transparent;
-    border-radius: 0.4rem;
+    border-radius: 6px;
     background: transparent;
     color: #111827;
     font-weight: 600;
-    font-size: 0.95rem;
+    font-size: 15px;
     white-space: nowrap;
     cursor: pointer;
     transition: background 160ms ease, color 160ms ease;
@@ -77,7 +73,7 @@
     }
 
     &.active {
-      background: #facc15; /* amber */
+      background: #facc15; 
       color: #111827;
       border-color: #facc15;
       font-weight: 700;
@@ -85,24 +81,24 @@
   }
 }
 
-/* Items */
+
 .menu-items {
   .section-title {
-    font-size: 1.2rem;
+    font-size: 19px;
     font-weight: 600;
-    margin-bottom: 1rem;
+    margin-bottom: 16px;
   }
 
   .items-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    gap: 1.25rem;
+    gap: 20px;
   }
 
   .menu-item-card {
     background: white;
     border: 1px solid #f3f4f6;
-    border-radius: 0.5rem;
+    border-radius: 8px;
     overflow: hidden;
     cursor: pointer;
     transition: transform 0.2s, box-shadow 0.2s;
@@ -120,42 +116,42 @@
     }
 
     .item-details {
-      padding: 1rem;
+      padding: 16px;
 
       .item-name {
-        font-size: 1rem;
+        font-size: 16px;
         font-weight: 600;
-        margin-bottom: 0.25rem;
+        margin-bottom: 4px;
       }
 
       .item-price {
-        font-size: 1rem;
+        font-size: 16px;
         font-weight: bold;
         color: #4f46e5;
-        margin-bottom: 0.25rem;
+        margin-bottom: 4px;
       }
 
       .item-desc {
-        font-size: 0.9rem;
+        font-size: 14px;
         color: #6b7280;
       }
     }
   }
 }
 
-/* Empty & Loading */
+
 .loading-container,
 .no-items-message {
   text-align: center;
-  padding: 2rem;
+  padding: 32px;
   color: #6b7280;
 
   .retry-btn {
-    margin-top: 1rem;
+    margin-top: 16px;
     background: #4f46e5;
     color: white;
     border: none;
-    padding: 0.6rem 1.2rem;
+    padding: 10px 19px;
     border-radius: 9999px;
     cursor: pointer;
     font-weight: 500;
@@ -166,7 +162,7 @@
   }
 }
 
-/* Modal */
+
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -179,17 +175,17 @@
 
 .modal-content {
   background: white;
-  border-radius: 0.5rem;
-  padding: 1.5rem;
+  border-radius: 8px;
+  padding: 24px;
   width: 90%;
   max-width: 500px;
   position: relative;
 
   .close-btn {
     position: absolute;
-    top: 0.75rem;
-    right: 0.75rem;
-    font-size: 1.5rem;
+    top: 12px;
+    right: 12px;
+    font-size: 24px;
     border: none;
     background: none;
     cursor: pointer;
@@ -204,34 +200,34 @@
     width: 100%;
     height: 220px;
     object-fit: cover;
-    border-radius: 0.25rem;
-    margin-bottom: 1rem;
+    border-radius: 4px;
+    margin-bottom: 16px;
   }
 
   .modal-title {
-    font-size: 1.4rem;
+    font-size: 22px;
     font-weight: bold;
-    margin-bottom: 0.25rem;
+    margin-bottom: 4px;
   }
 
   .modal-price {
-    font-size: 1.2rem;
+    font-size: 19px;
     font-weight: bold;
     color: #4f46e5;
-    margin-bottom: 0.75rem;
+    margin-bottom: 12px;
   }
 
   .modal-desc {
-    font-size: 0.95rem;
+    font-size: 15px;
     color: #6b7280;
-    margin-bottom: 1rem;
+    margin-bottom: 16px;
   }
 
   .add-to-cart-btn {
     background: #4f46e5;
     color: white;
     border: none;
-    padding: 0.75rem 1.5rem;
+    padding: 12px 24px;
     border-radius: 9999px;
     font-weight: 600;
     cursor: pointer;

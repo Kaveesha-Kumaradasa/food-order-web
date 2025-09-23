@@ -2,17 +2,9 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Subscription, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { PosService } from '../../services/pos.service';
-import { CartService } from '../../services/cart.service';
+import { MenuItem } from '../../components/menu-item/menu-item.component'; // 👈 reuse MenuItem type from modal
 
 type MenuCategory = { id: string | number; name: string };
-type MenuItem = {
-  id: string | number;
-  name: string;
-  description: string;
-  price: number;
-  image?: string;
-  categoryId?: string | number | null;
-};
 
 @Component({
   selector: 'app-homepage',
@@ -21,9 +13,6 @@ type MenuItem = {
   standalone: false,
 })
 export class HomepageComponent implements OnInit, OnDestroy {
-
-  selectedQty = 1;
-
   // UI state
   loadingCategories = false;
   loadingItems = false;
@@ -34,7 +23,7 @@ export class HomepageComponent implements OnInit, OnDestroy {
   selectedCategory: MenuCategory | null = null;
   filteredMenuItems: MenuItem[] = [];
 
-  // Modal
+  // Modal state
   showModal = false;
   selectedMenuItem: MenuItem | null = null;
 
@@ -46,10 +35,7 @@ export class HomepageComponent implements OnInit, OnDestroy {
   trackByCategory = (_: number, c: { id: string | number }) => c?.id;
   trackByItem = (_: number, it: { id: string | number }) => it?.id;
 
-  constructor(
-    private pos: PosService,
-    private cart: CartService     // ← inject CartService here, in the same constructor
-  ) {}
+  constructor(private pos: PosService) {}
 
   ngOnInit(): void {
     this.fetchMenu();
@@ -58,7 +44,6 @@ export class HomepageComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.subs.unsubscribe();
   }
-
 
   fetchMenu(): void {
     this.loadingCategories = true;
@@ -74,13 +59,18 @@ export class HomepageComponent implements OnInit, OnDestroy {
         catchError((err) => {
           console.error('[API error]', err);
           this.error = 'Failed to load menu.';
-          return of({ categories: [], itemsByCategory: new Map<string | number, MenuItem[]>() });
+          return of({
+            categories: [],
+            itemsByCategory: new Map<string | number, MenuItem[]>(),
+          });
         })
       ).subscribe(({ categories, itemsByCategory }) => {
         this.menuCategories = categories;
         this.itemsByCategory = itemsByCategory;
 
-        const firstWithItems = this.menuCategories.find(c => (this.itemsByCategory.get(c.id)?.length ?? 0) > 0);
+        const firstWithItems = this.menuCategories.find(
+          (c) => (this.itemsByCategory.get(c.id)?.length ?? 0) > 0
+        );
         this.selectedCategory = firstWithItems ?? this.menuCategories[0] ?? null;
         this.applyFilter();
 
@@ -94,10 +84,9 @@ export class HomepageComponent implements OnInit, OnDestroy {
     );
   }
 
-
   private buildMenuView(res: any): {
-    categories: MenuCategory[],
-    itemsByCategory: Map<string | number, MenuItem[]>
+    categories: MenuCategory[];
+    itemsByCategory: Map<string | number, MenuItem[]>;
   } {
     const categories: MenuCategory[] = [];
     const itemsByCategory = new Map<string | number, MenuItem[]>();
@@ -106,7 +95,9 @@ export class HomepageComponent implements OnInit, OnDestroy {
     if (data && typeof data === 'object' && !Array.isArray(data)) {
       for (const [categoryName, arr] of Object.entries<any[]>(data)) {
         const catId = this.slug(categoryName);
-        const items = Array.isArray(arr) ? arr.map(it => this.toMenuItem(it, catId)) : [];
+        const items = Array.isArray(arr)
+          ? arr.map((it) => this.toMenuItem(it, catId))
+          : [];
         categories.push({ id: catId, name: categoryName });
         itemsByCategory.set(catId, items);
       }
@@ -115,10 +106,13 @@ export class HomepageComponent implements OnInit, OnDestroy {
     return { categories, itemsByCategory };
   }
 
-  /** Previously: normalizeItem */
-  private toMenuItem(raw: any, categoryId?: string | number | null): MenuItem {
+  private toMenuItem(
+    raw: any,
+    categoryId?: string | number | null
+  ): MenuItem {
     const priceRaw = raw?.price ?? raw?.cost ?? 0;
-    const price = typeof priceRaw === 'string' ? parseFloat(priceRaw) : Number(priceRaw);
+    const price =
+      typeof priceRaw === 'string' ? parseFloat(priceRaw) : Number(priceRaw);
 
     return {
       id: String(raw?.id ?? raw?.itemId ?? raw?._id ?? randomId()),
@@ -130,7 +124,6 @@ export class HomepageComponent implements OnInit, OnDestroy {
     };
   }
 
-
   selectCategory(cat: MenuCategory): void {
     this.selectedCategory = cat;
     this.applyFilter();
@@ -141,7 +134,9 @@ export class HomepageComponent implements OnInit, OnDestroy {
       this.filteredMenuItems = [];
       return;
     }
-    this.filteredMenuItems = [...(this.itemsByCategory.get(this.selectedCategory.id) ?? [])];
+    this.filteredMenuItems = [
+      ...(this.itemsByCategory.get(this.selectedCategory.id) ?? []),
+    ];
   }
 
   openMenuModal(item: MenuItem): void {
@@ -154,18 +149,10 @@ export class HomepageComponent implements OnInit, OnDestroy {
     this.selectedMenuItem = null;
   }
 
-addToCart(item: MenuItem, qty: number = 1): void {
-    this.cart.add(
-      {
-        id: item.id,
-        name: item.name,
-        price: item.price,
-        image: item.image,
-        description: item.description,
-        categoryId: item.categoryId,
-      },
-      qty
-    );
+  /** 👇 add this */
+  addToCart(event: { item: MenuItem; qty: number }): void {
+    console.log('Added from modal:', event.item, 'x', event.qty);
+    // here you can later call CartService.add()
     this.closeMenuModal();
   }
 
@@ -181,9 +168,11 @@ addToCart(item: MenuItem, qty: number = 1): void {
     }
   }
 
-
   private slug(v: any): string {
-    return String(v ?? '').trim().toLowerCase().replace(/\s+/g, '-');
+    return String(v ?? '')
+      .trim()
+      .toLowerCase()
+      .replace(/\s+/g, '-');
   }
 }
 

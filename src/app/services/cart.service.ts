@@ -1,5 +1,7 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, map } from 'rxjs';
+import { AuthenticationService } from './user.service';
+import { Router } from '@angular/router';
 
 export type CartIdentity = string | number;
 
@@ -21,39 +23,45 @@ type CartState = {
   items: CartItem[];
 };
 
-const STORAGE_KEY = 'foodapp.cart.v1';
-
 @Injectable({ providedIn: 'root' })
 export class CartService {
-  private readonly _state$ = new BehaviorSubject<CartState>(this.load());
+  private readonly _state$ = new BehaviorSubject<CartState>({ items: [] });
   readonly state$ = this._state$.asObservable();
 
-  /** items stream for templates */
   readonly items$ = this.state$.pipe(map(s => s.items));
+  readonly count$ = this.items$.pipe(map(items => items.reduce((acc, it) => acc + it.qty, 0)));
+  readonly total$ = this.items$.pipe(map(items => items.reduce((acc, it) => acc + it.lineTotal, 0)));
 
-  /** total item count (sum of qty) */
-  readonly count$ = this.items$.pipe(
-    map(items => items.reduce((acc, it) => acc + it.qty, 0))
-  );
+  constructor(
+    private auth: AuthenticationService,
+    private router: Router
+  ) {
+    this.auth.currentUser.subscribe(() => {
+      this._state$.next(this.load());
+    });
+  }
 
-  /** cart grand total */
-  readonly total$ = this.items$.pipe(
-    map(items => items.reduce((acc, it) => acc + it.lineTotal, 0))
-  );
+  private getStorageKey(): string {
+    const userId = this.auth.currentUserValue?.id || 'guest';
+    return `foodapp.cart.v1.${userId}`;
+  }
 
   add(item: CartAddable, qty = 1) {
-    if (!item || !item.id) return;
+    // 🚨 Block guest users
+    if (!this.auth.currentUserValue?.id) {
+      alert('Please log in to add items to your cart.');
+      this.router.navigate(['/auth/login']);
+      return;
+    }
+
+    if (!item?.id) return;
     const st = this.clone();
     const idx = st.items.findIndex(i => String(i.id) === String(item.id));
     if (idx >= 0) {
       st.items[idx].qty += qty;
       st.items[idx].lineTotal = st.items[idx].qty * st.items[idx].price;
     } else {
-      st.items.unshift({
-        ...item,
-        qty,
-        lineTotal: (item.price ?? 0) * qty,
-      });
+      st.items.unshift({ ...item, qty, lineTotal: (item.price ?? 0) * qty });
     }
     this.commit(st);
   }
@@ -108,10 +116,9 @@ export class CartService {
 
   private load(): CartState {
     try {
-      const raw = localStorage.getItem(STORAGE_KEY);
+      const raw = localStorage.getItem(this.getStorageKey());
       if (!raw) return { items: [] };
       const parsed = JSON.parse(raw) as CartState;
-      // safety re-calc line totals
       parsed.items = (parsed.items ?? []).map(i => ({
         ...i,
         qty: Math.max(1, Math.floor(i.qty || 1)),
@@ -125,9 +132,8 @@ export class CartService {
 
   private save(st: CartState) {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(st));
+      localStorage.setItem(this.getStorageKey(), JSON.stringify(st));
     } catch {
-      // ignore storage errors (quota, privacy mode, etc.)
     }
   }
 }

@@ -4,7 +4,7 @@
 
   <form #registerForm="ngForm" (ngSubmit)="onSubmit(registerForm)" novalidate>
     <!-- Username -->
-    <div class="form-group">
+   <!-- <div class="form-group">
       <label for="username">Username</label>
       <input
         type="text"
@@ -19,7 +19,7 @@
         <small *ngIf="usernameCtrl.errors?.['required']">Username is required.</small>
         <small *ngIf="usernameCtrl.errors?.['minlength']">At least 2 characters.</small>
       </div>
-    </div>
+    </div>-->
 
     <!-- Email -->
     <div class="form-group">
@@ -87,7 +87,7 @@
         required
         #confirmCtrl="ngModel"
       />
-      <!-- ✅ compare inline instead of calling a private method -->
+
       <div class="field-error"
            *ngIf="(confirmCtrl.touched || submitted) && password && confirmPassword && (password !== confirmPassword)">
         <small>Passwords do not match.</small>

@@ -13,6 +13,6 @@ export const environment = {
   GRANT_TYPE: 'password',
 
  // Used by registration
-  webshop_brand_id: 1,   
+  //webshop_brand_id: 1,   
   default_country_code: '+94'
 };

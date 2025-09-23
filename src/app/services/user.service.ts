@@ -8,15 +8,14 @@ import { environment } from '../../environments/environment';
 
 export interface RegisterDTO {
   email: string;
-  username?: string;
   password: string;
   password_confirmation: string;
-
   first_name?: string;
   last_name?: string;
   country_code?: string;    
   contact_number?: string;   
   account_brand?: number;    
+  type?: string;             // add type for WEBSHOP
 }
 
 @Injectable({ providedIn: 'root' })
@@ -29,68 +28,74 @@ export class AuthenticationService {
     this.currentUser = this.currentUserSubject.asObservable();
   }
 
-  private mapResponseToUser(resp: any): User {
-    const token =
-      resp?.token ||
-      resp?.access_token ||
-      resp?.data?.token ||
-      resp?.data?.access_token;
-
-    const u = resp?.user || resp?.data?.user || resp;
-    const id = u?.id ?? u?.user_id ?? resp?.id ?? resp?.user_id;
-    const email = u?.email ?? resp?.email;
-    const name = u?.name ?? u?.full_name ?? u?.username ?? resp?.name;
-
-    if (!token) throw new Error('No token returned from server.');
-    return { id, email, name, token };
-  }
 
   register(payload: RegisterDTO): Observable<User> {
+    const body = {
+      ...payload,
+      type: 'WEBSHOP',
+      account_brand: environment.BRAND_ID
+    };
+
     return this.apiService
-      .post('/api/v1/webshop_customer/register', payload, 'user', { skipAuth: true }) 
+      .post('/api/v1/webshop_customer/register', body, 'user', { skipAuth: true })
       .pipe(
         map((response: any) => {
-          const user = this.mapResponseToUser(response);
+          const token = response?.data?.accessToken;
+          const user: User = {
+            id: response?.data?.created_id ?? payload.email,
+            email: payload.email,
+            name: payload.first_name ?? '',
+            token
+          };
+
           localStorage.setItem('currentUser', JSON.stringify(user));
           this.currentUserSubject.next(user);
+
+          console.info('[Register ✔ Auto-login]', user);
           return user;
         })
       );
   }
 
 
-login(identifier: string, password: string) {
-  const id = identifier.trim();
-  const isEmail = id.includes('@');
+  login(email: string, password: string): Observable<User> {
+    const payload = {
+      username: email.trim().toLowerCase(),   
+      password,
+      grant_type: environment.GRANT_TYPE,     
+      client_id: environment.CLIENT_ID,       
+      client_secret: environment.CLIENT_SECRET,
+      scope: '',
+      account_brand: environment.BRAND_ID
+    };
 
-  const payload: any = {
-    password,
-    account_brand: environment.webshop_brand_id, 
-    type: 'WEBSHOP'                              
-  };
-  if (isEmail) payload.email = id;
-  else payload.username = id;
+    console.log('Login payload →', payload);
 
+    return this.apiService.post(
+      '/api/v1/webshop_customer/login',
+      payload,
+      'user',
+      { skipAuth: true }
+    ).pipe(
+      map((response: any) => {
+        const token = response?.accessToken || response?.data?.accessToken;
+        if (!token) throw new Error('No token returned from server.');
 
-  return this.apiService.post(
-    '/api/v1/webshop_customer/login',
-    payload,
-    'user',
-    { skipAuth: true }
-  ).pipe(
-    map((response: any) => {
-      const user = this.mapResponseToUser(response);
-      localStorage.setItem('currentUser', JSON.stringify(user));
-      this.currentUserSubject.next(user);
-      console.info('Login OK →', { id: user.id, email: user.email, name: user.name });
-      return user;
-    })
-  );
-}
+        const user: User = {
+          id: response?.user_id ?? response?.data?.user_id ?? email,
+          email: email,
+          token
+        };
 
+        localStorage.setItem('currentUser', JSON.stringify(user));
+        this.currentUserSubject.next(user);
+        console.info('Login ✔ Success:', user);
+        return user;
+      })
+    );
+  }
 
-
-  // Inside AuthenticationService class
+  // --- SESSION HELPERS ---
   public get currentUserValue(): User | null {
     return this.currentUserSubject.value;
   }
@@ -99,16 +104,15 @@ login(identifier: string, password: string) {
     return !!this.currentUserSubject.value?.token;
   }
 
+logout(): void {
 
-
-  logout(): void {
-    localStorage.removeItem('currentUser');
-    this.currentUserSubject.next(null);
-  }
+  const userId = this.currentUserValue?.id;
+  localStorage.removeItem('currentUser');
+  this.currentUserSubject.next(null);
+}
 
   private getUserFromStorage(): User | null {
     const userJson = localStorage.getItem('currentUser');
     return userJson ? JSON.parse(userJson) : null;
   }
-
 }

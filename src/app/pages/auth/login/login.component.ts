@@ -1,3 +1,4 @@
+// pages/auth/login/login.component.ts
 import { Component, OnInit } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -12,8 +13,8 @@ import { User } from '../../../models/auth-model';
   standalone: false
 })
 export class LoginComponent implements OnInit {
-  identifier = '';   // email or username
-  password   = '';
+  email = '';
+  password = '';
   errorMessage: string | null = null;
   loading = false;
 
@@ -26,7 +27,6 @@ export class LoginComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    // If a guard/app routed here with a target, use it after login
     const qp = this.route.snapshot.queryParamMap;
     this.returnUrl = qp.get('returnUrl') || '/home';
   }
@@ -37,10 +37,10 @@ export class LoginComponent implements OnInit {
       return;
     }
 
-    const id = (this.identifier || '').trim();
+    const email = this.email.trim();
     const pwd = this.password;
 
-    if (!id || !pwd) {
+    if (!email || !pwd) {
       this.errorMessage = 'Please fill all required fields.';
       return;
     }
@@ -49,20 +49,15 @@ export class LoginComponent implements OnInit {
     this.loading = true;
 
     this.authService
-      .login(id, pwd)
-      .pipe(
-        take(1),
-        finalize(() => (this.loading = false))
-      )
+      .login(email, pwd)
+      .pipe(take(1), finalize(() => (this.loading = false)))
       .subscribe({
         next: (_user: User) => {
           this.errorMessage = null;
           this.router.navigateByUrl(this.returnUrl);
         },
         error: (err: any) => {
-          // Keep global toast/handler behavior; also show a concise message locally.
           const msg = (err?.message || '').toLowerCase();
-
           if (msg.includes('user account does not exist')) {
             this.errorMessage = 'We couldn’t find an account with those details.';
           } else if (msg.includes('invalid') || msg.includes('credentials')) {
@@ -70,8 +65,6 @@ export class LoginComponent implements OnInit {
           } else {
             this.errorMessage = err?.message || 'Login failed.';
           }
-
-          // Security nicety
           this.password = '';
         }
       });

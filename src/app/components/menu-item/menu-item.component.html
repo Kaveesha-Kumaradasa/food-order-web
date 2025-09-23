@@ -1,0 +1,21 @@
+<div class="modal-overlay" *ngIf="visible" (click)="onClose()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <button class="close-btn" (click)="onClose()">&times;</button>
+
+    <div *ngIf="item as smi">
+      <img [src]="smi.image || 'https://via.placeholder.com/300x200'" alt="{{ smi.name }}" class="modal-image" />
+
+      <h2 class="modal-title">{{ smi.name }}</h2>
+      <p class="modal-price">${{ smi.price | number:'1.2-2' }}</p>
+      <p class="modal-desc">{{ smi.description }}</p>
+
+      <div class="modal-actions">
+        <label class="qty-label">
+          Qty:
+          <input type="number" [(ngModel)]="qty" min="1" />
+        </label>
+        <button (click)="addToCart()">Add {{ qty }} to Cart</button>
+      </div>
+    </div>
+  </div>
+</div>
