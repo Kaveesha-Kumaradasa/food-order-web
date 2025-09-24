@@ -18,6 +18,6 @@ export class TopNavComponent {
 
   onLogout() {
     this.auth.logout();
-    this.router.navigate(['/home']); 
+    this.router.navigate(['/auth/login']);
   }
 }
