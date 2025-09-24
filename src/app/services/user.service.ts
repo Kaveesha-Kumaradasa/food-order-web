@@ -5,6 +5,7 @@ import { map } from 'rxjs/operators';
 import { ApiService } from './shared/api.service';
 import { User } from './../models/auth-model';
 import { environment } from '../../environments/environment';
+import { Router } from '@angular/router';
 
 export interface RegisterDTO {
   email: string;
@@ -15,7 +16,7 @@ export interface RegisterDTO {
   country_code?: string;    
   contact_number?: string;   
   account_brand?: number;    
-  type?: string;             // add type for WEBSHOP
+  type?: string;           
 }
 
 @Injectable({ providedIn: 'root' })
@@ -23,7 +24,7 @@ export class AuthenticationService {
   private currentUserSubject: BehaviorSubject<User | null>;
   public currentUser: Observable<User | null>;
 
-  constructor(private apiService: ApiService) {
+  constructor(private apiService: ApiService, private router: Router) {
     this.currentUserSubject = new BehaviorSubject<User | null>(this.getUserFromStorage());
     this.currentUser = this.currentUserSubject.asObservable();
   }
@@ -51,7 +52,7 @@ export class AuthenticationService {
           localStorage.setItem('currentUser', JSON.stringify(user));
           this.currentUserSubject.next(user);
 
-          console.info('[Register ✔ Auto-login]', user);
+          console.info('[Register Auto-login]', user);
           return user;
         })
       );
@@ -89,13 +90,13 @@ export class AuthenticationService {
 
         localStorage.setItem('currentUser', JSON.stringify(user));
         this.currentUserSubject.next(user);
-        console.info('Login ✔ Success:', user);
+        console.info('Login Success:', user);
         return user;
       })
     );
   }
 
-  // --- SESSION HELPERS ---
+
   public get currentUserValue(): User | null {
     return this.currentUserSubject.value;
   }
@@ -104,11 +105,11 @@ export class AuthenticationService {
     return !!this.currentUserSubject.value?.token;
   }
 
-logout(): void {
 
-  const userId = this.currentUserValue?.id;
+logout(): void {
   localStorage.removeItem('currentUser');
   this.currentUserSubject.next(null);
+  this.router.navigate(['/auth/login']);
 }
 
   private getUserFromStorage(): User | null {

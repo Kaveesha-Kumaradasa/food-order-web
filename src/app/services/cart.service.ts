@@ -47,7 +47,6 @@ export class CartService {
   }
 
   add(item: CartAddable, qty = 1) {
-    // 🚨 Block guest users
     if (!this.auth.currentUserValue?.id) {
       alert('Please log in to add items to your cart.');
       this.router.navigate(['/auth/login']);
@@ -103,7 +102,7 @@ export class CartService {
     this.commit({ items: [] });
   }
 
-  // ---- internals ----
+
   private clone(): CartState {
     const s = this._state$.value;
     return { items: s.items.map(i => ({ ...i })) };

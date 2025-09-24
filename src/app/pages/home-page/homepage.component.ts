@@ -13,25 +13,25 @@ type MenuCategory = { id: string | number; name: string };
   standalone: false,
 })
 export class HomepageComponent implements OnInit, OnDestroy {
-  // UI state
+
   loadingCategories = false;
   loadingItems = false;
   error = '';
 
-  // Data for template
+
   menuCategories: MenuCategory[] = [];
   selectedCategory: MenuCategory | null = null;
   filteredMenuItems: MenuItem[] = [];
 
-  // Modal state
+
   showModal = false;
   selectedMenuItem: MenuItem | null = null;
 
-  // Internal
+
   private subs = new Subscription();
   private itemsByCategory = new Map<string | number, MenuItem[]>();
 
-  // TrackBy
+
   trackByCategory = (_: number, c: { id: string | number }) => c?.id;
   trackByItem = (_: number, it: { id: string | number }) => it?.id;
 
@@ -149,10 +149,9 @@ export class HomepageComponent implements OnInit, OnDestroy {
     this.selectedMenuItem = null;
   }
 
-  /** 👇 add this */
+
   addToCart(event: { item: MenuItem; qty: number }): void {
     console.log('Added from modal:', event.item, 'x', event.qty);
-    // here you can later call CartService.add()
     this.closeMenuModal();
   }
 

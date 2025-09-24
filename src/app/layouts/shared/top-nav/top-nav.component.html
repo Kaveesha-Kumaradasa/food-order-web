@@ -12,7 +12,6 @@
 
   <!-- Logged-out view -->
   <ng-template #guest>
-    <!-- use button.linklike as a fallback that looks like a link -->
     <a routerLink="/home" (click)="navigateTo('/home')">Home</a>
     <a routerLink="/auth/login" (click)="navigateTo('/auth/login')">Login</a>
     <a routerLink="/auth/register" (click)="navigateTo('/auth/register')">Register</a>

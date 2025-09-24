@@ -47,6 +47,6 @@ export class MenuModalComponent {
 
   onClose() {
     this.close.emit();
-    this.qty = 1; // reset qty when closing
+    this.qty = 1; 
   }
 }

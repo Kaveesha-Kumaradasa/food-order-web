@@ -75,10 +75,9 @@ export class ApiService {
       error.message ||
       'An unexpected error occurred.';
 
-    // 401: clear session and send to login
+
     if (error.status === 401 || backendMessage === 'Unauthenticated.') {
       localStorage.removeItem('currentUser');
-      // hard redirect avoids router timing issues
       window.location.assign('/auth/login');
     }
 

@@ -9,7 +9,7 @@ describe('TopNavComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [TopNavComponent],
-      imports: [RouterTestingModule] // For routerLink testing
+      imports: [RouterTestingModule] 
     }).compileComponents();
   });
 

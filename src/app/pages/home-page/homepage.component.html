@@ -1,16 +1,13 @@
 <div class="homepage-container">
-  <!-- Shop Header -->
   <header class="shop-header">
     <h1 class="shop-name">Delicious Bites Restaurant</h1>
     <p class="shop-description">Your favorite food delivery spot</p>
   </header>
 
-  <!-- Loading -->
   <div *ngIf="loadingCategories || loadingItems" class="loading-container">
     <p>Loading delicious menu items...</p>
   </div>
 
-  <!-- Categories -->
   <section class="menu-categories" *ngIf="!loadingCategories">
     <h2 class="section-title">Menu Categories</h2>
     <div class="categories-scroll">
@@ -24,7 +21,6 @@
     </div>
   </section>
 
-  <!-- Items -->
   <section class="menu-items" *ngIf="selectedCategory && !loadingItems">
     <h2 class="section-title">{{ selectedCategory.name || 'Menu' }} Menu</h2>
 
